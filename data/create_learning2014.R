@@ -28,10 +28,11 @@ learning2014$surf <- rowMeans(select(learning2014, one_of(surf)))
 # Select analysis dataset from learning2014
 students2014 <- filter(select(learning2014, one_of(c("gender","Age","Attitude", "deep", "stra", "surf", "Points"))), Points > 0)
 
-# Write students2014 as a csv-file to the data folder
-write.csv(students2014, "data/students2014.csv", sep="\t")
+# Write students2014 as a table to the data folder
+write.table(students2014, "data/students2014.txt", sep="\t")
 
-# Read the csv-file and check structure
-data <- read.csv(students2014, "data/students2014.csv", sep="\t")
+# Read the table and check structure
+data <- read.table("data/students2014.txt", sep="\t")
 str(data)
 head(data)
+# ALL GOOD!
