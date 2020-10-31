@@ -7,12 +7,5 @@ The course seems to be set up nicely. At least much better than some online cour
 
 My GitHub repository: [https://github.com/MTurkkila/IODS-projectlink](https://github.com/MTurkkila/IODS-project) 
 
-```{r}
-# This is a so-called "R chunk" where you can write R code.
-
-date()
-
-```
-The text continues here.
 
 

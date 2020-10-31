@@ -1,15 +1,3 @@
-# Regression and model validation
-
-*Describe the work you have done this week and summarize your learning.*
-
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
-
-Did the scripting, but still need to write the interpretations and update this diary.
-Need to mention installing the packages.
-
-```{r}
 # Miikka Turkkila 31.10.2020
 # IODS2020 Exercise 2: regression and model validation, Analysis
 
@@ -64,8 +52,3 @@ dev.off ();
 # Residuals vs Fitted:
 # Normal Q-Q: 
 # Residuals vs Leverage: 
-```
-
-## Some thoughts
-* qqplot2 and plotting in R seems quite nice, but also somewhat different to Pythons matplotlib that I'm used to use. I want to learn more about plot manipulation and saving.
-* for exploratory stuff, scripting is not the most practical way to do things. In future I might use jupyter notebooks for my own work. Best feature of RStudio is the GitHub integrationn, but that's not that essential. 
