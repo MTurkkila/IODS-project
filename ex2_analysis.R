@@ -4,18 +4,16 @@
 # Access the dplyr library
 #library(dplyr)
 
-# access the GGally and ggplot2 libraries
-library(GGally)
+# access the ggplot2 library
 library(ggplot2)
-
 
 # Read the data
 students2014 <- read.table("data/students2014.txt", sep="\t")
 str(students2014)
 dim(students2014)
 # Data has 7 variables and 166 observations from questionnaire.
-# deep, stra and surf are sum variales scaled to orginal scale.
-# Data only inlcudes observations with point over 0
+# deep, stra and surf are sum variables scaled to original scale.
+# Data only includes observations with point over 0
 
 # create plot matrix with ggpairs() and draw the plot
 p <- ggpairs(students2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
@@ -28,7 +26,7 @@ dev.off ();
 # show summaries 
 summary(students2014)
 
-# Attitude, stra and surf have the highest absolute correlation swith points
+# Attitude, stra and surf have the highest absolute correlation with points
 # Let's choose those for the initial linear model
 # create a regression model with multiple explanatory variables
 my_model <- lm(Points ~ Attitude + stra + surf, data = students2014)
