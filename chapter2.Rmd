@@ -1,71 +1,57 @@
 # Regression and model validation
-
-*Describe the work you have done this week and summarize your learning.*
-
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
-
-Did the scripting, but still need to write the interpretations and update this diary.
-Need to mention installing the packages.
-
-```{r}
-# Miikka Turkkila 31.10.2020
-# IODS2020 Exercise 2: regression and model validation, Analysis
-
-# Access the dplyr library
-#library(dplyr)
-
-# access the GGally and ggplot2 libraries
-library(GGally)
+I started with the Datacamp and afterwards th data wrangling was straightforward and easy. Thus I used the data file from my local folder in the analysis. Below are the important parts of the script. Before any analysis,  ggplot2 and GGally libraries are accessed first as is the common practice.
+```{r message=FALSE, warning=FALSE}
 library(ggplot2)
-
-
-# Read the data
+library(GGally)
+```
+Read the data from local folder and check for structure and dimensions
+```{r}
 students2014 <- read.table("data/students2014.txt", sep="\t")
 str(students2014)
 dim(students2014)
-# Data has 7 variables and 166 observations from questionnaire.
-# deep, stra and surf are sum variales scaled to orginal scale.
-# Data only inlcudes observations with point over 0
+```
+The Data has 7 variables and 166 observations from questionnaire. Variables deep, stra and surf are sum variables scaled to original scale. Data only includes observations with point over 0.
 
-# create plot matrix with ggpairs() and draw the plot
+Next I use the ggpair-function to show graphical overview of the data. In the actual script, I also save the plots in a local folder *plots* with dev.copy()-function.
+```{r}
 p <- ggpairs(students2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
 p
+```
 
-# Save the plot
-dev.copy(jpeg,filename="plots/ex2_overview.jpg");
-dev.off ();
-
-# show summaries 
+In addition to plotting the dataframe, I checked the summaries of the data.
+```{r}
 summary(students2014)
-
-# Attitude, stra and surf have the highest absolute correlation swith points
-# Let's choose those for the initial linear model
-# create a regression model with multiple explanatory variables
+```
+As attitude, stra and surf have the highest absolute correlation with points I chose those for the initial linear model and created a regression model with multiple explanatory variables and print the summary of my model.
+```{r}
 my_model <- lm(Points ~ Attitude + stra + surf, data = students2014)
-# show summary of the model
 summary(my_model)
-
-# Only attitude is statistically significant
+```
+The summary shows estimations for the parameters of the linear model and the statistical significance for those estimates. Only attitude is statistically significant (shown with the stars) and therefore I only include it to the second model
+```{r}
 my_model2 <- lm(Points ~ Attitude, data = students2014)
 summary(my_model2)
+```
+The summaries show that now both $\alpha$ and $\beta$ variables are highly statistically significant. The estimates show that attitude has positive correlation with the attitude i.e. more positive attitude yields more points.
 
-# draw diagnostic plot
+The multiple R squared shows how much of the variation in the points is explains by the attitude. In this model, it is 19%
+
+Check for validity with diagnostic plots
+```{r}
 par(mfrow = c(2,2))
 plot(my_model2, which = c(1, 2, 5))
-
-# Let's also save this plot
-dev.copy(jpeg,filename="plots/ex2_diagnostic.jpg");
-dev.off ();
-
-# The model assumes normal distribution
-# Validity is quite good
-# Residuals vs Fitted:
-# Normal Q-Q: 
-# Residuals vs Leverage: 
 ```
+
+The model assumes that errors are normally distributed, are not correlated and have constant variance.
+
+* Residuals vs Fitted: Points are spread quite randomly, so constant variance assumption seems reasonable.
+* Normal Q-Q: There are some deviations form the line at low and high quantiles, so the normality assumption might be questionable. However, most points fit very nicely to the line.
+* Residuals vs Leverage: No single observation stand out.
+
+Overall, I'd say the model is quite reasonable.
 
 ## Some thoughts
 * qqplot2 and plotting in R seems quite nice, but also somewhat different to Pythons matplotlib that I'm used to use. I want to learn more about plot manipulation and saving.
-* for exploratory stuff, scripting is not the most practical way to do things. In future I might use jupyter notebooks for my own work. Best feature of RStudio is the GitHub integrationn, but that's not that essential. 
+* for exploratory stuff, scripting is not the most practical way to do things. In future I might use jupyter notebooks for my own work. Best feature of RStudio is the GitHub integrationn, but that's not that essential.
+* I tried knitting the Rmd-file to a pdf. It was interesting to see that it is done through \LaTeX, but at the same time it is nice to know that it is possible to use equations and such easily.
+* This round I've learned more about graphical model validation. Some of it, as well as the linear regression, I knew already. Also,  learned bit more about R and RMarkdown syntax.

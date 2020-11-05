@@ -1,11 +1,9 @@
 # Miikka Turkkila 31.10.2020
 # IODS2020 Exercise 2: regression and model validation, Analysis
 
-# Access the dplyr library
-#library(dplyr)
-
-# access the ggplot2 library
+# access the ggplot2 and GGally libraries
 library(ggplot2)
+library(GGally)
 
 # Read the data
 students2014 <- read.table("data/students2014.txt", sep="\t")
@@ -20,8 +18,8 @@ p <- ggpairs(students2014, mapping = aes(col = gender, alpha = 0.3), lower = lis
 p
 
 # Save the plot
-dev.copy(jpeg,filename="plots/ex2_overview.jpg");
-dev.off ();
+dev.copy(jpeg,filename="plots/ex2_overview.jpg")
+dev.off ()
 
 # show summaries 
 summary(students2014)
@@ -42,11 +40,5 @@ par(mfrow = c(2,2))
 plot(my_model2, which = c(1, 2, 5))
 
 # Let's also save this plot
-dev.copy(jpeg,filename="plots/ex2_diagnostic.jpg");
-dev.off ();
-
-# The model assumes normal distribution
-# Validity is quite good
-# Residuals vs Fitted:
-# Normal Q-Q: 
-# Residuals vs Leverage: 
+dev.copy(jpeg,filename="plots/ex2_diagnostic.jpg")
+dev.off ()
