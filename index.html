@@ -459,7 +459,7 @@ summary {
 <p>I started with the Datacamp and afterwards th data wrangling was straightforward and easy. Thus I used the data file from my local folder in the analysis. Below are the important parts of the script. Before any analysis, ggplot2 and GGally libraries are accessed first as is the common practice.</p>
 <pre class="r"><code>library(ggplot2)
 library(GGally)</code></pre>
-<p>Read the data from local folder and check for structure and dimensions</p>
+<p>Read the data from a local folder and check for structure and dimensions</p>
 <pre class="r"><code>students2014 &lt;- read.table(&quot;data/students2014.txt&quot;, sep=&quot;\t&quot;)
 str(students2014)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    166 obs. of  7 variables:
@@ -472,7 +472,7 @@ str(students2014)</code></pre>
 ##  $ Points  : int  25 12 24 10 22 21 21 31 24 26 ...</code></pre>
 <pre class="r"><code>dim(students2014)</code></pre>
 <pre><code>## [1] 166   7</code></pre>
-<p>The Data has 7 variables and 166 observations from questionnaire. Variables deep, stra and surf are sum variables scaled to original scale. Data only includes observations with point over 0.</p>
+<p>The Data has 7 variables and 166 observations from a questionnaire. Variables deep, stra and surf are sum variables scaled to the original scale. The data only includes observations with points over 0.</p>
 <p>Next I use the ggpair-function to show graphical overview of the data. In the actual script, I also save the plots in a local folder <em>plots</em> with dev.copy()-function.</p>
 <pre class="r"><code>p &lt;- ggpairs(students2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap(&quot;facethist&quot;, bins = 20)))
 p</code></pre>
