@@ -440,7 +440,9 @@ summary {
 <li><a href="#regression-and-model-validation">Regression and model validation</a><ul>
 <li><a href="#some-thoughts">Some thoughts</a></li>
 </ul></li>
-<li><a href="#logistic-regression">Logistic regression</a></li>
+<li><a href="#logistic-regression">Logistic regression</a><ul>
+<li><a href="#the-data">The Data</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -564,6 +566,18 @@ plot(my_model2, which = c(1, 2, 5))</code></pre>
 </div>
 <div id="logistic-regression" class="section level1">
 <h1>Logistic regression</h1>
+<div id="the-data" class="section level2">
+<h2>The Data</h2>
+<pre class="r"><code>alc &lt;- read.csv(&quot;data/alc.csv&quot;)
+variable.names(alc)</code></pre>
+<pre><code>##  [1] &quot;school&quot;     &quot;sex&quot;        &quot;age&quot;        &quot;address&quot;    &quot;famsize&quot;   
+##  [6] &quot;Pstatus&quot;    &quot;Medu&quot;       &quot;Fedu&quot;       &quot;Mjob&quot;       &quot;Fjob&quot;      
+## [11] &quot;reason&quot;     &quot;nursery&quot;    &quot;internet&quot;   &quot;guardian&quot;   &quot;traveltime&quot;
+## [16] &quot;studytime&quot;  &quot;failures&quot;   &quot;schoolsup&quot;  &quot;famsup&quot;     &quot;paid&quot;      
+## [21] &quot;activities&quot; &quot;higher&quot;     &quot;romantic&quot;   &quot;famrel&quot;     &quot;freetime&quot;  
+## [26] &quot;goout&quot;      &quot;Dalc&quot;       &quot;Walc&quot;       &quot;health&quot;     &quot;absences&quot;  
+## [31] &quot;G1&quot;         &quot;G2&quot;         &quot;G3&quot;         &quot;alc_use&quot;    &quot;high_use&quot;</code></pre>
+</div>
 </div>
 
 

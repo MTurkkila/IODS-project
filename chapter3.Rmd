@@ -1,7 +1,7 @@
 # Logistic regression
 
-
+## The Data
 ```{r}
-
-
+alc <- read.csv("data/alc.csv")
+variable.names(alc)
 ```

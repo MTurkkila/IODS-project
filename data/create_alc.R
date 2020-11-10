@@ -57,4 +57,4 @@ alc <- mutate(alc, high_use = alc_use > 2)
 glimpse(alc)
 
 # Save the data
-write.csv(alc, file = "data/alc.csv")
+write.csv(alc, file = "data/alc.csv", row.names = FALSE)
