@@ -1,7 +1,96 @@
 # Logistic regression
 
 ## The Data
+The data includes background information and alcohol consumption of Portuguese students. The data is joined from two original data sets of student performance in math and in Portuguese language. The joined data includes two new variables: 'alc_use' and 'high_use'. 'alc_use' is mean of weekend alcohol use (Walc) and  workday alcohol use (Dalc). VAriable 'high_use' is boolean value with condition: 'high_use > 2'.
+
+Below is list of the variables in the data. The complete description of original data can be found at [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance)
 ```{r}
 alc <- read.csv("data/alc.csv")
 variable.names(alc)
+```
+## The Analysis
+The purpose of this analysis is to examine relationship between alcohol comsumption and free time. Four variables related to the free time and thus chosen for the analysis are:
+* freetime - free time after school (numeric: from 1 - very low to 5 - very high) 
+* goout - going out with friends (numeric: from 1 - very low to 5 - very high) 
+* activities - extra-curricular activities (binary: yes or no)
+* paid - extra paid classes within the course subject (binary: yes or no)
+
+The hypothesis is that more free time student has and conversely less additional school activities, greater the chance for high alcohol consumption.
+
+Fist, let's select t
+```{r}
+library(tidyr); library(dplyr); library(ggplot2)
+alc4 <- c("freetime", "goout","activities", "paid")
+gather(alc[alc4]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+```
+
+And boxplots for free time and going out
+```{r}
+ggplot(alc, aes(x = high_use, y =freetime)) + geom_boxplot()
+```
+```{r}
+ggplot(alc, aes(x = high_use, y =goout)) + geom_boxplot()
+```
+
+Comments on findings
+```{r}
+m <- glm(high_use ~ freetime + goout + activities + paid, data = alc, family = "binomial")
+summary(m)
+```
+
+Compute odds ratios 'OR' and confidence intervals 'CI' and print them.
+```{r}
+OR <- coef(m) %>% exp
+CI <- confint(m) %>% exp
+cbind(OR, CI)
+```
+
+```{r}
+# predict() the probability of high_use
+probabilities <- predict(m, type = "response")
+# add the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+# use the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability > 0.5)
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction)
+```
+
+```{r}
+ggplot(alc, aes(x = probability, y = high_use, col = prediction)) + geom_point()
+```
+
+```{r}
+table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+```
+
+```{r}
+# define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = alc$high_use, prob = alc$probability)
+```
+
+```{r}
+# More code
+```
+
+```{r}
+# More code
+```
+
+```{r}
+# More code
+```
+
+```{r}
+# More code
+```
+
+```{r}
+# More code
 ```
