@@ -19,7 +19,7 @@ The purpose of this analysis is to examine relationship between alcohol consumpt
 The hypothesis is that more free time and going out a student has greater the chance for high alcohol consumption.
 
 Firstly, to study distributions of the chosen variables, let's draw bar plots:
-```{r}
+```{r message=TRUE, warning=FALSE}
 library(tidyr); library(dplyr); library(ggplot2)
 alc4 <- c("freetime", "traveltime", "goout","activities")
 gather(alc[alc4]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
