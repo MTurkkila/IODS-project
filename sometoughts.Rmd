@@ -2,4 +2,6 @@
 * qqplot2 and plotting in R seems quite nice, but also somewhat different to Pythons matplotlib that I'm used to use. I want to learn more about plot manipulation and saving.
 * for exploratory stuff, scripting is not the most practical way to do things. In future I might use jupyter notebooks for my own work. Best feature of RStudio is the GitHub integrationn, but that's not that essential.
 * I tried knitting the Rmd-file to a pdf. It was interesting to see that it is done through \LaTeX, but at the same time it is nice to know that it is possible to use equations and such easily.
-* This round I've learned more about graphical model validation. Some of it, as well as the linear regression, I knew already. Also,  learned bit more about R and RMarkdown syntax.
+* 2nd round I've learned more about graphical model validation. Some of it, as well as the linear regression, I knew already. Also,  learned bit more about R and RMarkdown syntax.
+* What is the difference between different errors. I feel like the usage is not coherent
+* Need to learn to draw the so cold as curve for the logistic regression with the observed and predicted values.

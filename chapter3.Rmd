@@ -1,7 +1,7 @@
 # Logistic regression
 
 ## The Data
-The data includes background information and alcohol consumption of Portuguese students. The data is joined from two original data sets of student performance in math and in Portuguese language. The joined data includes two new variables: 'alc_use' and 'high_use'. 'alc_use' is mean of weekend alcohol use (Walc) and  workday alcohol use (Dalc). VAriable 'high_use' is boolean value with condition: 'high_use > 2'.
+The data includes background information and alcohol consumption of Portuguese students. The data is joined from two original data sets of student performance in math and in Portuguese language. The joined data includes two new variables: `alc_use` and `high_use`. `alc_use` is mean of weekend alcohol use (Walc) and  workday alcohol use (Dalc). Variable `high_use` is boolean value with condition: `high_use > 2`.
 
 Below is list of the variables in the data. The complete description of original data can be found at [UCI Machine Learning repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance)
 ```{r}
@@ -9,88 +9,129 @@ alc <- read.csv("data/alc.csv")
 variable.names(alc)
 ```
 ## The Analysis
-The purpose of this analysis is to examine relationship between alcohol comsumption and free time. Four variables related to the free time and thus chosen for the analysis are:
-* freetime - free time after school (numeric: from 1 - very low to 5 - very high) 
-* goout - going out with friends (numeric: from 1 - very low to 5 - very high) 
-* activities - extra-curricular activities (binary: yes or no)
-* paid - extra paid classes within the course subject (binary: yes or no)
+The purpose of this analysis is to examine relationship between alcohol consumption and free time. Four variables related to the free time and thus chosen for the analysis are:
 
-The hypothesis is that more free time student has and conversely less additional school activities, greater the chance for high alcohol consumption.
+* freetime - free time after school
+* traveltime - home to school travel time
+* goout - going out with friends 
+* activities - extra-curricular activities
 
-Fist, let's select t
+The hypothesis is that more free time and going out a student has greater the chance for high alcohol consumption.
+
+Firstly, to study distributions of the chosen variables, let's draw bar plots:
 ```{r}
 library(tidyr); library(dplyr); library(ggplot2)
-alc4 <- c("freetime", "goout","activities", "paid")
+alc4 <- c("freetime", "traveltime", "goout","activities")
 gather(alc[alc4]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
 ```
 
-And boxplots for free time and going out
+Free time and going out seems to be quite normally distributed. Home to school travel time is heavily skewed to short, under 15 minutes travel times. Extra-curricular activities is split quite evenly. Thus, it can be assumed that variables free time and going out has more significance in alcohol consumption. 
+
+Let's also do simple cross-tabulation of high alcohol consumption with median of free time and going out.
 ```{r}
-ggplot(alc, aes(x = high_use, y =freetime)) + geom_boxplot()
-```
-```{r}
-ggplot(alc, aes(x = high_use, y =goout)) + geom_boxplot()
+alc %>% group_by(high_use) %>% summarise(count = n(), going_out = median(goout), freetime = median(freetime))
 ```
 
-Comments on findings
+Median for going out is higher for the group that goes out more. It might be that free time in itself does not affect alcohol consumption as much. However let's start the logistic model with all four variables as is instructed.
+
+### Logistic model
+To build the logistic model I use `glm`-function with all four variables and print the summary of the model 
 ```{r}
-m <- glm(high_use ~ freetime + goout + activities + paid, data = alc, family = "binomial")
+m <- glm(high_use ~ freetime + traveltime + goout + activities, data = alc, family = "binomial")
 summary(m)
 ```
 
-Compute odds ratios 'OR' and confidence intervals 'CI' and print them.
+As expected, going out is significant predictor for high alcohol consumption. Surprisingly, also travel time has statistical signifigance. Let's build new model with these two variables.
 ```{r}
+m <- glm(high_use ~ traveltime + goout, data = alc, family = "binomial")
+summary(m)
+```
+
+Compute odds ratios `OR` and confidence intervals `CI` and print them.
+```{r message=FALSE}
 OR <- coef(m) %>% exp
 CI <- confint(m) %>% exp
 cbind(OR, CI)
 ```
 
+As the odds ratio is higher that 1 for both variables, it means that both variables are positively associated with the high alcohol consumption.
+
+### Predictions from the model
+To explore the predictive power of the logistic model `m`, I use `predict()` function to make predictions for high alcohol consumption. The probabilities from the predictions are added to the `alc` dataframe as well as boolean value with the same condition, `>0.5` as the observational data. Finally we print cross tabulation of predictions and actual values.
 ```{r}
-# predict() the probability of high_use
 probabilities <- predict(m, type = "response")
-# add the predicted probabilities to 'alc'
 alc <- mutate(alc, probability = probabilities)
-# use the probabilities to make a prediction of high_use
 alc <- mutate(alc, prediction = probability > 0.5)
-# tabulate the target variable versus the predictions
 table(high_use = alc$high_use, prediction = alc$prediction)
 ```
 
+Let's also plot the actual values and the predictions
 ```{r}
-ggplot(alc, aes(x = probability, y = high_use, col = prediction)) + geom_point()
+g <- ggplot(alc, aes(x = probability, y = high_use, col = prediction))
+g + geom_point()
 ```
 
+Looks like there are quite many false predictions so let's check the training error by first defining loss function
 ```{r}
-table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
-```
-
-```{r}
-# define a loss function (mean prediction error)
 loss_func <- function(class, prob) {
   n_wrong <- abs(class - prob) > 0.5
   mean(n_wrong)
 }
+```
 
-# call loss_func to compute the average number of wrong predictions in the (training) data
+Next we call that loss function to compute percentage of wrong predictions
+```{r}
 loss_func(class = alc$high_use, prob = alc$probability)
 ```
 
+The result shows that around 26% of the predictions are wrong. The model is not very good at predictions, but it still is somewhat better than simply fifty-fifty guessing.
+
+# Cross-validation 
+
+Let's use `cv.glm()` function form 'boot' library for K-fold cross-validation and start with 10-fold cross-validation. The function returns vector 'delta' which first component is the estimate for prediction error. The `cv.glm()` function uses the previously defined loss functions as the cost function. 
 ```{r}
-# More code
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv$delta[1]
+```
+The predictor error is slightly higher than the training error and it is also the close to the error in the datacamp exercise. Let's check if it is possible to find logistic model with smaller error.  
+The next bit of code uses ten different logistic regression models with different number of predictor variables. In a `for` loop prediction probabilities are computed for each model. Additionally, 10-fold cross-validation is performed. Finally, training and prediction errors are plotted against number of predictors
+
+```{r warning=FALSE}
+# Dataframe for training and prediction errors
+errors <- data.frame(matrix(ncol=3,nrow=0, dimnames=list(NULL, c("n_pred", "training", "prediction"))))
+
+# Models with different number of predictors
+m1 <- high_use ~ goout + traveltime + freetime + activities + studytime + paid + romantic+G1+G2+G3
+m2 <- high_use ~ goout + traveltime + freetime + activities + studytime + paid + romantic+G1+G2
+m3 <- high_use ~ goout + traveltime + freetime + activities + studytime + paid + romantic+G1
+m4 <- high_use ~ goout + traveltime + freetime + activities + studytime + paid + romantic
+m5 <- high_use ~ goout + traveltime + freetime + activities + studytime + paid
+m6 <- high_use ~ goout + traveltime + freetime + activities + studytime
+m7 <- high_use ~ goout + traveltime + freetime + activities # The original model
+m8 <- high_use ~ goout + traveltime + freetime
+m9 <- high_use ~ goout + traveltime # The updated model used in assignments
+m10 <- high_use ~ goout
+
+for(i in 1:10) {
+  tmp <- paste0("m",i)
+  m <- glm(tmp, data = alc, family = "binomial")
+  probabilities <- predict(m, type = "response")
+  alc <- mutate(alc, probability = probabilities)
+  alc <- mutate(alc, prediction = probability > 0.5)
+  cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+  errors[i, "n_pred"] <- 11-i
+  errors[i, "training"] <- loss_func(class = alc$high_use, prob = alc$probability)
+  errors[i, "prediction"] <- cv$delta[1]
+}
+
+g <- errors %>% gather(key,error, training, prediction) %>%ggplot(aes(x=n_pred, y=error, colour=key))
+g + geom_line() + scale_x_discrete(limits=c(1:10), name = "Number of predictors")
 ```
 
-```{r}
-# More code
-```
+Both errors decrease slightly when number of predictors increases, but the trend is not linear or even stable. Also the absolute amount does not change that much only from 26% to 22% in training error between 2 (the model used in th exercises) and 6 predictors. If I check the summary of that six predictor model, only studytime has statistical significance  in addition to the 2 predictor model. Of course, it would be possible to continue with this exploration and maybe even find smaller training and prediction error. Then we would be close to machine learning and that's a topic for another time.
 
 ```{r}
-# More code
-```
-
-```{r}
-# More code
-```
-
-```{r}
-# More code
+m <- glm(m5, data = alc, family = "binomial")
+summary(m)
 ```
