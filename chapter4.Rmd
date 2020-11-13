@@ -1,0 +1,138 @@
+# Clustering and classification
+
+in this chapter...
+please also see [bonus](#bonus) and [shiny](#shiny)
+
+```{r}
+library(MASS); library(tidyr); library(dplyr); library(ggplot2); library(corrplot)
+
+# load the data
+data("Boston")
+
+# explore the dataset
+str(Boston)
+summary(Boston)
+```
+
+```{r}
+# plot matrix of the variables
+pairs(Boston)
+
+# calculate the correlation matrix and round it
+cor_matrix<-cor(Boston) 
+
+# print the correlation matrix
+cor_matrix <- cor_matrix %>% round(2)
+
+# visualize the correlation matrix
+corrplot(cor_matrix, method="circle", type="upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+```
+
+```{r}
+# center and standardize variables
+boston_scaled <- scale(Boston)
+
+# summaries of the scaled variables
+summary(boston_scaled)
+
+# class of the boston_scaled object
+class(boston_scaled)
+
+# change the object to data frame
+boston_scaled <- as.data.frame(boston_scaled)
+
+# summary of the scaled crime rate
+summary(boston_scaled$crim)
+
+# create a quantile vector of crim and print it
+bins <- quantile(boston_scaled$crim)
+bins
+
+# create a categorical variable 'crime'
+crime <- cut(boston_scaled$crim, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
+
+# look at the table of the new factor crime
+table(crime)
+
+# remove original crim from the dataset
+boston_scaled <- dplyr::select(boston_scaled, -crim)
+
+# add the new categorical value to scaled data
+boston_scaled <- data.frame(boston_scaled, crime)
+
+```
+
+
+Dividing the data set to train and test sets
+```{r}
+# number of rows in the Boston dataset 
+n <- nrow(boston_scaled)
+
+# choose randomly 80% of the rows
+ind <- sample(n,  size = n * 0.8)
+# create test set 
+test <- boston_scaled[-ind,]
+
+# save the correct classes from test data
+correct_classes <- test$crime
+
+# remove the crime variable from test data
+test <- dplyr::select(test, -crime)
+```
+
+
+## Linear discriminant analysis
+
+More about LDA in this StatQuest-video  
+<iframe width="640" height="385" src="https://www.youtube.com/embed/azXCzI57Yfc" frameborder="0" allowfullscreen></iframe>
+
+5. Fit the linear discriminant analysis on the train set. Use the categorical crime rate as the target variable and all the other variables in the dataset as predictor variables. Draw the LDA (bi)plot.
+```{r}
+# code here
+```
+
+```{r}
+# code here
+```
+
+6. Save the crime categories from the test set and then remove the categorical crime variable from the test dataset. Then predict the classes with the LDA model on the test data. Cross tabulate the results with the crime categories from the test set. Comment on the results
+```{r}
+# code here
+```
+
+```{r}
+# code here
+```
+
+7. Reload the Boston dataset and standardize the dataset (we did not do this in the Datacamp exercises, but you should scale the variables to get comparable distances). Calculate the distances between the observations. Run k-means algorithm on the dataset. Investigate what is the optimal number of clusters and run the algorithm again. Visualize the clusters (for example with the pairs() or ggpairs() functions, where the clusters are separated with colors) and interpret the results.
+```{r}
+# code here
+```
+
+```{r}
+# code here
+```
+
+## BONUS{#bonus}
+
+```{r}
+# code here
+```
+
+```{r}
+# code here
+```
+
+
+```{r}
+# code here
+```
+
+```{r}
+# code here
+```
+
+# Shiny{#shiny}
+```{r}
+# code here
+```
