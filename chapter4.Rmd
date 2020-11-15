@@ -3,29 +3,25 @@
 in this chapter...
 please also see [bonus](#bonus) and [shiny](#shiny)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(MASS); library(tidyr); library(dplyr); library(ggplot2); library(corrplot)
+```
 
+```{r}
 # load the data
 data("Boston")
-
 # explore the dataset
 str(Boston)
 summary(Boston)
 ```
 
 ```{r}
-# plot matrix of the variables
-pairs(Boston)
-
 # calculate the correlation matrix and round it
 cor_matrix<-cor(Boston) 
-
 # print the correlation matrix
 cor_matrix <- cor_matrix %>% round(2)
-
 # visualize the correlation matrix
-corrplot(cor_matrix, method="circle", type="upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+corrplot(cor_matrix, method="circle", type="lower", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
 ```
 
 ```{r}
@@ -67,15 +63,14 @@ Dividing the data set to train and test sets
 ```{r}
 # number of rows in the Boston dataset 
 n <- nrow(boston_scaled)
-
 # choose randomly 80% of the rows
 ind <- sample(n,  size = n * 0.8)
+# create train set
+train <- boston_scaled[ind,]
 # create test set 
 test <- boston_scaled[-ind,]
-
 # save the correct classes from test data
 correct_classes <- test$crime
-
 # remove the crime variable from test data
 test <- dplyr::select(test, -crime)
 ```
@@ -88,7 +83,12 @@ More about LDA in this StatQuest-video
 
 5. Fit the linear discriminant analysis on the train set. Use the categorical crime rate as the target variable and all the other variables in the dataset as predictor variables. Draw the LDA (bi)plot.
 ```{r}
-# code here
+# linear discriminant analysis
+lda.fit <- lda(crime ~., data = train)
+# target classes as numeric
+classes <- as.numeric(train$crime)
+# plot the lda results
+plot(lda.fit, dimen = 2, col = classes, pch = classes)
 ```
 
 ```{r}
@@ -97,7 +97,11 @@ More about LDA in this StatQuest-video
 
 6. Save the crime categories from the test set and then remove the categorical crime variable from the test dataset. Then predict the classes with the LDA model on the test data. Cross tabulate the results with the crime categories from the test set. Comment on the results
 ```{r}
-# code here
+# predict classes with test data
+lda.pred <- predict(lda.fit, newdata = test)
+
+# cross tabulate the results
+table(correct = correct_classes, predicted = lda.pred$class)
 ```
 
 ```{r}
@@ -106,26 +110,108 @@ More about LDA in this StatQuest-video
 
 7. Reload the Boston dataset and standardize the dataset (we did not do this in the Datacamp exercises, but you should scale the variables to get comparable distances). Calculate the distances between the observations. Run k-means algorithm on the dataset. Investigate what is the optimal number of clusters and run the algorithm again. Visualize the clusters (for example with the pairs() or ggpairs() functions, where the clusters are separated with colors) and interpret the results.
 ```{r}
-# code here
+data('Boston')
+Boston = scale(Boston)
+
+# euclidean distance matrix
+dist_eu <- dist(Boston)
+
+# look at the summary of the distances
+summary(dist_eu)
+
+# manhattan distance matrix
+dist_man <- dist(Boston, method = "manhattan")
+
+# look at the summary of the distances
+summary(dist_man)
+
 ```
 
 ```{r}
-# code here
+# k-means clustering
+km <-kmeans(Boston, centers = 3)
+
+# plot the Boston dataset with clusters
+pairs(Boston, col = km$cluster)
+
+
+# The optimal clustering
+set.seed(123)
+
+# determine the number of clusters
+k_max <- 10
+
+# calculate the total within sum of squares
+twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss})
+
+# visualize the results
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+
+# k-means clustering
+km <-kmeans(Boston, centers = 2)
+
+# plot the Boston dataset with clusters
+pairs(Boston, col = km$cluster)
+
+
 ```
 
 ## BONUS{#bonus}
 
+### Bonus
+
+Perform k-means on the original Boston data with some reasonable number of clusters (> 2). Remember to standardize the dataset. Then perform LDA using the clusters as target classes. Include all the variables in the Boston data in the LDA model. 
 ```{r}
-# code here
+data('Boston')
+Boston2 = as.data.frame(scale(Boston))
+
+km <-kmeans(Boston2, centers = 3)
+
+km$cluster
+
+lda.fit <- lda(km$cluster ~., data = Boston2)
+lda.fit
+```
+Visualize the results with a biplot (include arrows representing the relationships of the original variables to the LDA solution). Interpret the results. Which variables are the most influencial linear separators for the clusters?
+```{r}
+# the function for lda biplot arrows
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+
+# target classes as numeric
+classes <- as.numeric(km$cluster)
+
+# plot the lda results
+plot(lda.fit, dimen = 2, col = classes, pch = classes)
+lda.arrows(lda.fit, myscale = 4)
 ```
 
+### Super-Bonus
+Run the code below for the (scaled) train data that you used to fit the LDA. The code creates a matrix product, which is a projection of the data points.
 ```{r}
-# code here
+lda.fit <- lda(crime ~., data = train)
+
+model_predictors <- dplyr::select(train, -crime)
+
+# check the dimensions
+dim(model_predictors)
+dim(lda.fit$scaling)
+
+# matrix multiplication
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
 ```
 
 
-```{r}
-# code here
+```{r message=FALSE, warning=FALSE}
+library(plotly)
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers')
 ```
 
 ```{r}
@@ -133,6 +219,58 @@ More about LDA in this StatQuest-video
 ```
 
 # Shiny{#shiny}
+
+Let's test shiny widget. Below is source code fot `kmeans_cluster()` functions from the R Markdown: The Definitive Guide chapter [19.4 Shiny widgets](https://bookdown.org/yihui/rmarkdown/shiny-widgets.html)
+
+```{r}
+kmeans_cluster = function(dataset) {
+
+  library(shiny)  
+  vars = names(dataset)
+
+  shinyApp(
+    ui = fluidPage(
+      fluidRow(style = "padding-bottom: 20px;",
+        column(4, selectInput('xcol', 'X Variable', vars)),
+        column(4, selectInput('ycol', 'Y Variable', vars,
+                              selected = vars[2])),
+        column(4, numericInput('clusters', 'Cluster count', 3,
+                               min = 1, max = 9))
+      ),
+      fluidRow(
+        plotOutput('kmeans', height = "400px")  
+      )
+    ),
+
+    server = function(input, output, session) {
+
+      # Combine the selected variables into a new data frame
+      selectedData = reactive({
+        dataset[, c(input$xcol, input$ycol)]
+      })
+
+      clusters = reactive({
+        kmeans(selectedData(), input$clusters)
+      })
+
+      output$kmeans = renderPlot(height = 400, {
+        res = clusters()
+        par(mar = c(5.1, 4.1, 0, 1))
+        plot(selectedData(),
+             col = res$cluster, pch = 20, cex = 3)
+        points(res$centers, pch = 4, cex = 4, lwd = 4)
+      })
+    },
+
+    options = list(height = 500)
+  )
+}
+```
+
+```{r, echo = FALSE}
+kmeans_cluster(Boston)
+```
+
 ```{r}
 # code here
 ```

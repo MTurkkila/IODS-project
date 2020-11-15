@@ -9,6 +9,7 @@ output:
     fig_caption: true
     fig_width: 6
     fig_height: 4
+runtime: shiny
 ---
 
 ***
@@ -29,6 +30,12 @@ output:
 
 ```{r child = "chapter3.Rmd"}
 # This will include Chapter 3 (that is updated in its own file) in the document.
+```
+
+***
+
+```{r child = "chapter4.Rmd"}
+# This will include Chapter 4 (that is updated in its own file) in the document.
 ```
 
 ***
