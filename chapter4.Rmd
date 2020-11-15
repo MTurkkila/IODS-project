@@ -161,13 +161,11 @@ pairs(Boston, col = km$cluster)
 ### Bonus
 
 Perform k-means on the original Boston data with some reasonable number of clusters (> 2). Remember to standardize the dataset. Then perform LDA using the clusters as target classes. Include all the variables in the Boston data in the LDA model. 
-```{r}
+```{r eval=FALSE, include=FALSE}
 data('Boston')
 Boston2 = as.data.frame(scale(Boston))
 
 km <-kmeans(Boston2, centers = 3)
-
-km$cluster
 
 lda.fit <- lda(km$cluster ~., data = Boston2)
 lda.fit
