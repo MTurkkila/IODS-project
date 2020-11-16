@@ -86,7 +86,7 @@ loss_func(class = alc$high_use, prob = alc$probability)
 
 The result shows that around 26% of the predictions are wrong. The model is not very good at predictions, but it still is somewhat better than simply fifty-fifty guessing.
 
-# Cross-validation 
+## Cross-validation 
 
 Let's use `cv.glm()` function form 'boot' library for K-fold cross-validation and start with 10-fold cross-validation. The function returns vector 'delta' which first component is the estimate for prediction error. The `cv.glm()` function uses the previously defined loss functions as the cost function. 
 ```{r}
