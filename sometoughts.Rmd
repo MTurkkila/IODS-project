@@ -5,3 +5,4 @@
 * 2nd round I've learned more about graphical model validation. Some of it, as well as the linear regression, I knew already. Also,  learned bit more about R and RMarkdown syntax.
 * What is the difference between different errors. I feel like the usage is not coherent
 * Need to learn to draw the so cold as curve for the logistic regression with the observed and predicted values.
+* MASS and dplyr libraries are somewhat incompatible

@@ -1,80 +1,70 @@
 # Clustering and classification
 
-in this chapter...
-please also see [bonus](#bonus) and [shiny](#shiny)
+In this chapter I look into linear discriminant analysis and k-means clustering using reay made data set from the MASS-library.
+please also see [bonus](#bonus), tho not ready yet
 
+## The Data
+Access the required libraries
 ```{r message=FALSE, warning=FALSE}
-library(MASS); library(tidyr); library(dplyr); library(ggplot2); library(corrplot)
+library(MASS); library(tidyr); library(ggplot2); library(corrplot)
 ```
 
+First I load the `Boston` data set and explore it with `str` and `summary`.
 ```{r}
-# load the data
 data("Boston")
-# explore the dataset
 str(Boston)
 summary(Boston)
 ```
 
+The `MASS` package contains data sets to accompany book "Modern Applied Statistics with S" by W. N. Venables and B. D. Ripley with several distinct data from different sources. The `Boston` data set contains Housing values in suburbs of Boston. The set includes, for example, variables `crim` that is the per capita crime rate by town and `age` that is proportion of owner-occupied units built prior to 1940. For complete descriptions please see (Boston {MASS})[https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html].
+
+Next, let's plot distributions of the variables. For fun, let's use color of the Faculty of Educational Sciences.
 ```{r}
-# calculate the correlation matrix and round it
-cor_matrix<-cor(Boston) 
-# print the correlation matrix
+gather(Boston) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar(fill="#fcd116", color="#fcd116", alpha=0.9)
+```
+
+From the bar charts it is apparent that the data is not normally distributed and, in most cases, strongly skewed.
+
+To asses different relationships of the variables let's plot correlation matrix. I think lower triangular matrix looks better so let's use `type = "lower"` instead `upper` as it was in the datacamp exercises.
+```{r}
+cor_matrix <-cor (Boston) 
 cor_matrix <- cor_matrix %>% round(2)
-# visualize the correlation matrix
 corrplot(cor_matrix, method="circle", type="lower", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
 ```
+The per capita crime rate most strongly correlates positively with variables `rad` and `tax` that are index of accessibility to radial highways and full-value property-tax rate per \$10,000 respectively. These two variables are also strongly correlated together. I can not reason for the connection between these variables ans the crime rate.
 
+For the following analyzes we need to standardize the data I use the `scale` function. The function subtracts column mean from each value and then divides it with the standard deviation: $scaled(x) = \frac{x-\bar{x}}{\mu_x}$
+
+We can see this effect with the summary.
 ```{r}
-# center and standardize variables
 boston_scaled <- scale(Boston)
-
-# summaries of the scaled variables
 summary(boston_scaled)
+```
+The scaling does not change the distribution of the data but scales all variable values around zero (mean).
 
-# class of the boston_scaled object
+The scaled data set is a matrix instead of dataframe, so let's change it back. Replotting distributions, we see that the actual distributions do not change, but the values are 
+```{r}
 class(boston_scaled)
-
-# change the object to data frame
 boston_scaled <- as.data.frame(boston_scaled)
-
-# summary of the scaled crime rate
-summary(boston_scaled$crim)
-
-# create a quantile vector of crim and print it
-bins <- quantile(boston_scaled$crim)
-bins
-
-# create a categorical variable 'crime'
-crime <- cut(boston_scaled$crim, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
-
-# look at the table of the new factor crime
-table(crime)
-
-# remove original crim from the dataset
-boston_scaled <- dplyr::select(boston_scaled, -crim)
-
-# add the new categorical value to scaled data
-boston_scaled <- data.frame(boston_scaled, crime)
-
 ```
 
-
-Dividing the data set to train and test sets
+Next, I create categorical variable of the crime rate by first dividing the data into four (quantile) bins and then cutting the data to those bins and giving each bin a label. Also, original `crim` variable is removed and the categorical variable added to the scaled data set.
 ```{r}
-# number of rows in the Boston dataset 
+bins <- quantile(boston_scaled$crim)
+crime <- cut(boston_scaled$crim, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
+boston_scaled <- dplyr::select(boston_scaled, -crim)
+boston_scaled <- data.frame(boston_scaled, crime)
+```
+
+Additionally, I divide the data set to train and test sets for future use. To select 80% of the data randomly as the train set, I use `sample` to randomly select `n*0.8` indexes from the scaled data set. Then, I use those index to select the data. Using `[-ind,]` selects the rows not in `[ind,]`.  Lastly, I save the correct crime classes form test set and remove them from that set.
+```{r}
 n <- nrow(boston_scaled)
-# choose randomly 80% of the rows
 ind <- sample(n,  size = n * 0.8)
-# create train set
 train <- boston_scaled[ind,]
-# create test set 
 test <- boston_scaled[-ind,]
-# save the correct classes from test data
 correct_classes <- test$crime
-# remove the crime variable from test data
 test <- dplyr::select(test, -crime)
 ```
-
 
 ## Linear discriminant analysis
 
@@ -82,97 +72,79 @@ More about LDA in this StatQuest-video
 <iframe width="640" height="385" src="https://www.youtube.com/embed/azXCzI57Yfc" frameborder="0" allowfullscreen></iframe>
 
 5. Fit the linear discriminant analysis on the train set. Use the categorical crime rate as the target variable and all the other variables in the dataset as predictor variables. Draw the LDA (bi)plot.
+
+For the linear discriminant analysis I use the categorical crime rate created above as the target variable and all other variables as predictors. Data for the fit is the train set previously cut from the `boston_scaled` dataframe. Next, I draw the LDA plot. 
 ```{r}
-# linear discriminant analysis
+palette(c("#fcd116","#00a6ed","#f6511d", "#7fb800")) # Custom color palette
 lda.fit <- lda(crime ~., data = train)
-# target classes as numeric
 classes <- as.numeric(train$crime)
-# plot the lda results
 plot(lda.fit, dimen = 2, col = classes, pch = classes)
 ```
 
+Now, it is possible to predict crime rate categories using the LDA fit. Let's check predictions from the test set agains the correct classes and cross tabulate the results.
 ```{r}
-# code here
-```
-
-6. Save the crime categories from the test set and then remove the categorical crime variable from the test dataset. Then predict the classes with the LDA model on the test data. Cross tabulate the results with the crime categories from the test set. Comment on the results
-```{r}
-# predict classes with test data
 lda.pred <- predict(lda.fit, newdata = test)
-
-# cross tabulate the results
 table(correct = correct_classes, predicted = lda.pred$class)
 ```
 
-```{r}
-# code here
-```
+The predictions are quite good as most values are on the diagonal. Only `med_low` gets several false positives.
+
 
 7. Reload the Boston dataset and standardize the dataset (we did not do this in the Datacamp exercises, but you should scale the variables to get comparable distances). Calculate the distances between the observations. Run k-means algorithm on the dataset. Investigate what is the optimal number of clusters and run the algorithm again. Visualize the clusters (for example with the pairs() or ggpairs() functions, where the clusters are separated with colors) and interpret the results.
+
+Before k-means clustering, I standardize the orginial Boston data set and calculate euclidean and manhattan distance.
 ```{r}
-data('Boston')
-Boston = scale(Boston)
-
-# euclidean distance matrix
+Boston <- scale(Boston)
+Boston <- as.data.frame(Boston)
 dist_eu <- dist(Boston)
-
-# look at the summary of the distances
 summary(dist_eu)
-
-# manhattan distance matrix
 dist_man <- dist(Boston, method = "manhattan")
-
-# look at the summary of the distances
 summary(dist_man)
+```
+The euclidean distances sre clearly shorter as, I think, they should be.
 
+Next I do k-means clustering with three centers and draw correlation plots, with data point colors corresponding with clusters, of a few intresting variables.
+```{r}
+km <-kmeans(Boston, centers = 3)
+pairs(Boston[,c(1,9, 10, 12, 13, 14)], col = km$cluster)
 ```
 
+To determine optimal number of clusters I calculate and visualize within cluster sum of squares (WCSS) as function of clusters. As `kmeans` assigns initial clusters randomly, I set constant seed used in random number generator.
 ```{r}
-# k-means clustering
-km <-kmeans(Boston, centers = 3)
-
-# plot the Boston dataset with clusters
-pairs(Boston, col = km$cluster)
-
-
-# The optimal clustering
-set.seed(123)
-
-# determine the number of clusters
+set.seed(123) # the seed for rng
 k_max <- 10
+twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss}) # these lines form datacamp exercise
+qplot(x = 1:k_max, y = twcss, geom = 'line') + scale_x_continuous(breaks=c(1:10))
+```
 
-# calculate the total within sum of squares
-twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss})
+The twcss drops most drastically from one to two clusters meaning that two clusters is the optimal number of clusters.
 
-# visualize the results
-qplot(x = 1:k_max, y = twcss, geom = 'line')
-
-# k-means clustering
+```{r}
 km <-kmeans(Boston, centers = 2)
+pairs(Boston[,c(1,9, 10, 12, 13, 14)], col = km$cluster)
+```
 
-# plot the Boston dataset with clusters
-pairs(Boston, col = km$cluster)
+Visually also two clusters looks better than three.
 
-
+```{r eval=FALSE, include=FALSE}
+# need ggally lib. This for nicer plots if time
+km <-kmeans(Boston, centers = 2)
+ggpairs(data = Boston, aes(col = km$cluster))
 ```
 
 ## BONUS{#bonus}
 
 ### Bonus
 
-Perform k-means on the original Boston data with some reasonable number of clusters (> 2). Remember to standardize the dataset. Then perform LDA using the clusters as target classes. Include all the variables in the Boston data in the LDA model. 
-```{r eval=FALSE, include=FALSE}
-data('Boston')
-Boston2 = as.data.frame(scale(Boston))
-
-km <-kmeans(Boston2, centers = 3)
-
-lda.fit <- lda(km$cluster ~., data = Boston2)
-lda.fit
-```
-Visualize the results with a biplot (include arrows representing the relationships of the original variables to the LDA solution). Interpret the results. Which variables are the most influencial linear separators for the clusters?
+For this bonus assignment I use LDA fit for three clusters from k-means algorithm. 
 ```{r}
-# the function for lda biplot arrows
+Boston <- dplyr::select(Boston, -chas) # need remove this variable as the lda.fit doesn't work with it when knitting
+km <-kmeans(Boston, centers = 3)
+lda.fit <- lda(km$cluster ~., data = Boston)
+```
+
+Visualization of clusters and arrows done with code from datacamp. 
+```{r}
 lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
   heads <- coef(x)
   arrows(x0 = 0, y0 = 0, 
@@ -181,26 +153,20 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0
   text(myscale * heads[,choices], labels = row.names(heads), 
        cex = tex, col=color, pos=3)
 }
-
 # target classes as numeric
 classes <- as.numeric(km$cluster)
-
 # plot the lda results
-plot(lda.fit, dimen = 2, col = classes, pch = classes)
-lda.arrows(lda.fit, myscale = 4)
+plot(lda.fit, dimen = 2, col = classes, pch = classes, )
+lda.arrows(lda.fit, myscale = 3, color="black")
 ```
 
+With three clusters it seem like variables `age`, `zn`, `tax` and `nox` are the most influential separators.
+
 ### Super-Bonus
-Run the code below for the (scaled) train data that you used to fit the LDA. The code creates a matrix product, which is a projection of the data points.
+The code below for the (scaled) train data that you used to fit the LDA. The code creates a matrix product, which is a projection of the data points.
 ```{r}
 lda.fit <- lda(crime ~., data = train)
-
 model_predictors <- dplyr::select(train, -crime)
-
-# check the dimensions
-dim(model_predictors)
-dim(lda.fit$scaling)
-
 # matrix multiplication
 matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
 matrix_product <- as.data.frame(matrix_product)
@@ -209,66 +175,18 @@ matrix_product <- as.data.frame(matrix_product)
 
 ```{r message=FALSE, warning=FALSE}
 library(plotly)
-plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers')
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color = train$crime)
 ```
 
-```{r}
-# code here
-```
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# this not working. too tired to fix
+km <-kmeans(train, centers = 3)
+lda.fit <- lda(km$cluster ~., data = train)
 
-# Shiny{#shiny}
+model_predictors <- dplyr::select(train, -crime)
+# matrix multiplication
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
 
-Let's test shiny widget. Below is source code fot `kmeans_cluster()` functions from the R Markdown: The Definitive Guide chapter [19.4 Shiny widgets](https://bookdown.org/yihui/rmarkdown/shiny-widgets.html)
-
-```{r}
-kmeans_cluster = function(dataset) {
-
-  library(shiny)  
-  vars = names(dataset)
-
-  shinyApp(
-    ui = fluidPage(
-      fluidRow(style = "padding-bottom: 20px;",
-        column(4, selectInput('xcol', 'X Variable', vars)),
-        column(4, selectInput('ycol', 'Y Variable', vars,
-                              selected = vars[2])),
-        column(4, numericInput('clusters', 'Cluster count', 3,
-                               min = 1, max = 9))
-      ),
-      fluidRow(
-        plotOutput('kmeans', height = "400px")  
-      )
-    ),
-
-    server = function(input, output, session) {
-
-      # Combine the selected variables into a new data frame
-      selectedData = reactive({
-        dataset[, c(input$xcol, input$ycol)]
-      })
-
-      clusters = reactive({
-        kmeans(selectedData(), input$clusters)
-      })
-
-      output$kmeans = renderPlot(height = 400, {
-        res = clusters()
-        par(mar = c(5.1, 4.1, 0, 1))
-        plot(selectedData(),
-             col = res$cluster, pch = 20, cex = 3)
-        points(res$centers, pch = 4, cex = 4, lwd = 4)
-      })
-    },
-
-    options = list(height = 500)
-  )
-}
-```
-
-```{r, echo = FALSE}
-kmeans_cluster(Boston)
-```
-
-```{r}
-# code here
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color = km$cluster)
 ```
