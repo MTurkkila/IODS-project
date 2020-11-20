@@ -1,7 +1,7 @@
 # Clustering and classification
 
-In this chapter I look into linear discriminant analysis and k-means clustering using reay made data set from the MASS-library.
-please also see [bonus](#bonus), tho not ready yet
+In this chapter I look into linear discriminant analysis and k-means clustering using ready made data set from the MASS-library.
+please also see [bonus](#bonus), tho not ready yet.
 
 ## The Data
 Access the required libraries
@@ -71,8 +71,6 @@ test <- dplyr::select(test, -crime)
 More about LDA in this StatQuest-video  
 <iframe width="640" height="385" src="https://www.youtube.com/embed/azXCzI57Yfc" frameborder="0" allowfullscreen></iframe>
 
-5. Fit the linear discriminant analysis on the train set. Use the categorical crime rate as the target variable and all the other variables in the dataset as predictor variables. Draw the LDA (bi)plot.
-
 For the linear discriminant analysis I use the categorical crime rate created above as the target variable and all other variables as predictors. Data for the fit is the train set previously cut from the `boston_scaled` dataframe. Next, I draw the LDA plot. 
 ```{r}
 palette(c("#fcd116","#00a6ed","#f6511d", "#7fb800")) # Custom color palette
@@ -88,9 +86,6 @@ table(correct = correct_classes, predicted = lda.pred$class)
 ```
 
 The predictions are quite good as most values are on the diagonal. Only `med_low` gets several false positives.
-
-
-7. Reload the Boston dataset and standardize the dataset (we did not do this in the Datacamp exercises, but you should scale the variables to get comparable distances). Calculate the distances between the observations. Run k-means algorithm on the dataset. Investigate what is the optimal number of clusters and run the algorithm again. Visualize the clusters (for example with the pairs() or ggpairs() functions, where the clusters are separated with colors) and interpret the results.
 
 Before k-means clustering, I standardize the orginial Boston data set and calculate euclidean and manhattan distance.
 ```{r}
