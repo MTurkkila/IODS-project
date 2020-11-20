@@ -1,0 +1,26 @@
+# Dimensionality reduction techniques
+
+```{r}
+# Koodi tänne
+```
+
+```{r}
+# Koodi tänne
+```
+
+```{r}
+# Koodi tänne
+```
+
+```{r}
+# Koodi tänne
+```
+
+```{r}
+# Koodi tänne
+```
+
+```{r}
+# Koodi tänne
+```
+
