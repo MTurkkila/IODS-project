@@ -62,7 +62,7 @@ y = pca_human_std$x["Finland",2]*4
 points(x=x, y=y, pch = 20, col = "deeppink", cex = 0.8)
 ```
 <!-- Give your personal interpretations of the first two principal component dimensions based on the biplot drawn after PCA on the standardized human data. (0-2 points) -->
-Again, the difference with variables `Rep` and `lab_ratio` and rest of the variables is evident as those two variables mainly correlate with the second principal component (PC2). This component could describe, for example, female representation in society. As the first principal component could be some general index for standard of living as relates to life expectancy, income and education and on the other end maternal mortality and adolescent birth rate. The plot quite clearly groups countries by continents.
+Again, the difference with variables `Rep` and `lab_ratio` and rest of the variables is evident as those two variables mainly correlate with the second principal component (PC2). This component could describe, for example, female representation in society. As the first principal component could be some general index for standard of living as relates to life expectancy, income and education and on the other end maternal mortality and adolescent birth rate. The plot quite clearly groups countries by regions. For example, Finland is grouped with the other Nordic countries. 
 
 ## Multiple Correspondence Analysis (MCA)
 
