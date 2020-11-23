@@ -4,10 +4,10 @@ In this chapter I look into principal component analysis (PCA) and multiple corr
 
 ## The Data for PCA
 First access the libraries and load the `human` data. Let's also define two custom colors for plots.
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(GGally); library(dplyr); library(corrplot); library(ggplot2); library(tidyr)
 human <- read.csv("data/human2.csv", row.names = 1)
-pca_colors <- c("gray45", "#fcd116")
+pca_colors <- c(adjustcolor("gray40", alpha.f = 0.5), "#fcd116") # transparent light gray and faculty yellow
 ```
 
 ```{r}
@@ -35,7 +35,7 @@ As the variables in the data are highly correlated, principal component analysis
 <!-- Standardize the variables in the human data and repeat the above analysis. Interpret the results of both analysis (with and without standardizing). Are the results different? Why or why not? Include captions (brief descriptions) in your plots where you describe the results by using not just your variable names, but the actual phenomenons they relate to. (0-4 points) -->
 
 Let's begin with PCA on non-standardized human data and compute the variance percentages. Then repeat it with standardized data and plot both side-by-side with variance percentage on the labels.
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE,  fig.width=10, fig.height=8}
 par(mfrow = c(1,2))
 
 pca_human <- prcomp(human)
@@ -53,13 +53,16 @@ biplot(pca_human_std, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab 
 ```
 
 The non-standardized data has one dimension that explains all of the variance. Consequently, this dimension is the `GNI` variable and this is because the absolute values of the variable are at least two orders f magnitude higher. Clearly, the data needs to be standardized before PCA can reveal any meaningful insights.
+```{r}
+pca_human_std$x["Finland",]
+```
 
-In the scaled PCA-biplot, the first principal component (PC1) explains 53.6% of the variance in the data. Let's plot that but bigger, to make interpretation easier. Let's also highlight Finland in the plot with pink star.
-```{r, fig.width=10, fig.height=8}
+In the scaled PCA-biplot, the first principal component (PC1) explains 53.6% of the variance in the data. Let's plot that but bigger, to make interpretation easier. Let's also highlight Finland in the plot with small pink point.
+```{r, fig.width=12, fig.height=10}
 biplot(pca_human_std, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab = pc_lab[2])
-x = pca_human_std$x["Finland",1]
-y = pca_human_std$x["Finland",2]
-points(x, y, pch = 8, col = "deeppink", cex = 2)
+x = pca_human_std$x["Finland",1]*2.5
+y = pca_human_std$x["Finland",2]*4
+points(x=x, y=y, pch = 20, col = "deeppink", cex = 0.8)
 ```
 <!-- Give your personal interpretations of the first two principal component dimensions based on the biplot drawn after PCA on the standardized human data. (0-2 points) -->
 Again, the difference with variables `Rep` and `lab_ratio` and rest of the variables is evident as those two variables mainly correlate with the second principal component (PC2). This component could describe, for example, female representation in society. As the first principal component could be some general index for standard of living as relates to life expectancy, income and education and on the other end maternal mortality and adolescent birth rate. The plot quite clearly groups countries by continents.
