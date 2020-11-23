@@ -54,7 +54,7 @@ biplot(pca_human_std, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab 
 
 The non-standardized data has one dimension that explains all of the variance. Consequently, this dimension is the `GNI` variable and this is because the absolute values of the variable are at least two orders f magnitude higher. Clearly, the data needs to be standardized before PCA can reveal any meaningful insights.
 
-In the scaled PCA-biplot, the first principal component (PC1) explains 53.6% of the variance in the data. Let's plot that but bigger, to make interpretation easier. Let's also highlight Finland in the plot with small pink point.
+In the scaled PCA-biplot, the first principal component (PC1) explains 53.6% of the variance in the data. Let's plot that but bit bigger, to make interpretation easier. Let's also highlight Finland in the plot with small pink point.
 ```{r, fig.width=12, fig.height=10}
 biplot(pca_human_std, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab = pc_lab[2])
 x = pca_human_std$x["Finland",1]*2.5
