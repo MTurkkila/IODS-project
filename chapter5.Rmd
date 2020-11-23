@@ -1,9 +1,16 @@
 # Dimensionality reduction techniques
 
-Access the libraries and load the `human` data.
+In this chapter I look into principal component analysis (PCA) and multiple correspondence analysis (MCA) as dimension reduction techniques. PCA is used for continuous data and here I use the `human` data from the data wrangling exercise. MCA is done with categorical data from the `FactoMineR` library.
+
+## The Data for PCA
+First access the libraries and load the `human` data. Let's also define two custom colors for plots.
 ```{r}
-library(GGally); library(dplyr); library(corrplot)
+library(GGally); library(dplyr); library(corrplot); library(ggplot2); library(tidyr)
 human <- read.csv("data/human2.csv", row.names = 1)
+pca_colors <- c("gray45", "#fcd116")
+```
+
+```{r}
 str(human)
 summary(human)
 ```
@@ -21,13 +28,13 @@ cor(human) %>% corrplot(method="circle", type="lower", cl.pos = "b", tl.pos = "d
 
 Interestingly, `lab_ratio` and `Rep` are clearly much less strongly correlated that the other variables, but they do correlate with each other. The `lab_ratio` is ratio of females to males in the labour force and the `Rep` is percentage of female representative in parliament. Thus, I think, it is not surprising that these two correlate.
 
-## Pricipal Cpmponent Analysis (PCA)
+## Pricipal Component Analysis (PCA)
 
-Something about PCA
+As the variables in the data are highly correlated, principal component analysis or PCA is applicable and can show which variables count most of the variance within the data.
 <!-- Perform principal component analysis (PCA) on the not standardized human data. Show the variability captured by the principal components. Draw a biplot displaying the observations by the first two principal components (PC1 coordinate in x-axis, PC2 coordinate in y-axis), along with arrows representing the original variables. (0-2 points) -->
 <!-- Standardize the variables in the human data and repeat the above analysis. Interpret the results of both analysis (with and without standardizing). Are the results different? Why or why not? Include captions (brief descriptions) in your plots where you describe the results by using not just your variable names, but the actual phenomenons they relate to. (0-4 points) -->
 
-Let's begin with PCA on non-standardized human data and compute the variance percentages. Then repeated with standardized data and plot both side-by-side with variance percentage on the labels.
+Let's begin with PCA on non-standardized human data and compute the variance percentages. Then repeat it with standardized data and plot both side-by-side with variance percentage on the labels.
 ```{r message=FALSE, warning=FALSE}
 par(mfrow = c(1,2))
 
@@ -35,27 +42,34 @@ pca_human <- prcomp(human)
 s <- summary(pca_human)
 pca_pr <- round(100*s$importance[2, ], digits = 1)
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
-biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+biplot(pca_human, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab = pc_lab[2])
 
 human_std <- scale(human)
 pca_human_std <- prcomp(human_std)
 s <- summary(pca_human_std)
 pca_pr <- round(100*s$importance[2, ], digits = 1)
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
-biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+biplot(pca_human_std, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab = pc_lab[2])
 ```
 
 The non-standardized data has one dimension that explains all of the variance. Consequently, this dimension is the `GNI` variable and this is because the absolute values of the variable are at least two orders f magnitude higher. Clearly, the data needs to be standardized before PCA can reveal any meaningful insights.
 
+In the scaled PCA-biplot, the first principal component (PC1) explains 53.6% of the variance in the data. Let's plot that but bigger, to make interpretation easier. Let's also highlight Finland in the plot with pink star.
+```{r, fig.width=10, fig.height=8}
+biplot(pca_human_std, cex = c(0.8, 1), col = pca_colors, xlab = pc_lab[1], ylab = pc_lab[2])
+x = pca_human_std$x["Finland",1]
+y = pca_human_std$x["Finland",2]
+points(x, y, pch = 8, col = "deeppink", cex = 2)
+```
 <!-- Give your personal interpretations of the first two principal component dimensions based on the biplot drawn after PCA on the standardized human data. (0-2 points) -->
-
+Again, the difference with variables `Rep` and `lab_ratio` and rest of the variables is evident as those two variables mainly correlate with the second principal component (PC2). This component could describe, for example, female representation in society. As the first principal component could be some general index for standard of living as relates to life expectancy, income and education and on the other end maternal mortality and adolescent birth rate. The plot quite clearly groups countries by continents.
 
 ## Multiple Correspondence Analysis (MCA)
 
 MCA is kinda like PCA, but for categorical data.
 <!-- Load the tea dataset from the package Factominer. Explore the data briefly: look at the structure and the dimensions of the data and visualize it. Then do Multiple Correspondence Analysis on the tea data (or to a certain columns of the data, it’s up to you). Interpret the results of the MCA and draw at least the variable biplot of the analysis. You can also explore other plotting options for MCA. Comment on the output of the plots. (0-4 points) -->
 
-Access the `FactoMineR` library and the tea dataset.
+Access the `FactoMineR` library and the tea data set.
 ```{r}
 library(FactoMineR)
 data(tea)
@@ -71,11 +85,11 @@ str(tea_time)
 
 From the output it is clear that all of the six variables are categorical. Let's draw bar plots to visualize the data.
 ```{r warning=FALSE}
-library(ggplot2)
 p <- gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free")
 p <- p + geom_bar()
 p + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 ```
+
 Variable `sugar` is quite even, but all other variables have distribution with one popular category.
 
 Next, produce the MCA model (without a graph) and print the summary of the model
@@ -84,9 +98,9 @@ mca <- MCA(tea_time, graph = FALSE)
 summary(mca)
 ```
 
-The summary shows how musch of variance the different dimensions explain. Let's also visualize the MCA model.
-```{r}
+The summary shows how much of variance the different dimensions explain. Let's also visualize the MCA model.
+```{r, fig.width=8, fig.height=6}
 plot(mca, invisible=c("ind"), habillage = "quali")
 ```
 
-Not really sure how to interpret this kind of plot.
+As the variance is similar between different dimensions, the MCA does not yield significant insight in to the data. Consequently, the dimensions of this plot are bit more challenging to interpret. Perhaps the horizontal dimension is how people drink tea that seems to be correspond with from where people by their tea. The vertical axis is more about how people drink tea.
