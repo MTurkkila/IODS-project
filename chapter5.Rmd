@@ -5,51 +5,47 @@ Access the libraries and load the `human` data.
 library(GGally); library(dplyr); library(corrplot)
 human <- read.csv("data/human2.csv", row.names = 1)
 str(human)
+summary(human)
 ```
-
+The data consists of eight continuous variables. As each observation  i.e. row is named by a country the data does not include the country as categorical variable.
 
 <!-- Show a graphical overview of the data and show summaries of the variables in the data. Describe and interpret the outputs, commenting on the distributions of the variables and the relationships between them. (0-3 points) -->
-```{r}
-ggpairs(human) # miksi tulee nuo plot rivit?
+```{r message=FALSE}
+ggpairs(human)
 ```
 
+Only the `edu2_ratio` and `Year_edu` are somewhat normally distributed and all other are clearly skewed. However, there are many significant correlation in the data. For example, `edu2_ratio` correlates with 5 out of 7 variables. Let's draw correlation matrix to better visualize all correlations within this data.
 ```{r}
-cor(human) %>% corrplot() # muotoile kivemmaksi
+cor(human) %>% corrplot(method="circle", type="lower", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
 ```
+
+Interestingly, `lab_ratio` and `Rep` are clearly much less strongly correlated that the other variables, but they do correlate with each other. The `lab_ratio` is ratio of females to males in the labour force and the `Rep` is percentage of female representative in parliament. Thus, I think, it is not surprising that these two correlate.
 
 ## Pricipal Cpmponent Analysis (PCA)
 
+Something about PCA
 <!-- Perform principal component analysis (PCA) on the not standardized human data. Show the variability captured by the principal components. Draw a biplot displaying the observations by the first two principal components (PC1 coordinate in x-axis, PC2 coordinate in y-axis), along with arrows representing the original variables. (0-2 points) -->
-```{r}
+<!-- Standardize the variables in the human data and repeat the above analysis. Interpret the results of both analysis (with and without standardizing). Are the results different? Why or why not? Include captions (brief descriptions) in your plots where you describe the results by using not just your variable names, but the actual phenomenons they relate to. (0-4 points) -->
+
+Let's begin with PCA on non-standardized human data and compute the variance percentages. Then repeated with standardized data and plot both side-by-side with variance percentage on the labels.
+```{r message=FALSE, warning=FALSE}
+par(mfrow = c(1,2))
+
 pca_human <- prcomp(human)
 s <- summary(pca_human)
 pca_pr <- round(100*s$importance[2, ], digits = 1)
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
 biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
-```
 
-
-<!-- Standardize the variables in the human data and repeat the above analysis. Interpret the results of both analysis (with and without standardizing). Are the results different? Why or why not? Include captions (brief descriptions) in your plots where you describe the results by using not just your variable names, but the actual phenomenons they relate to. (0-4 points) -->
-
-Repeated with standardized data and variance percentages to the labels.
-```{r}
 human_std <- scale(human)
 pca_human_std <- prcomp(human_std)
-
 s <- summary(pca_human_std)
 pca_pr <- round(100*s$importance[2, ], digits = 1)
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
 biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
-
 ```
 
-Plots side-by-side
-```{r}
-par(mfrow = c(1,2))
-biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
-biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
-```
-
+The non-standardized data has one dimension that explains all of the variance. Consequently, this dimension is the `GNI` variable and this is because the absolute values of the variable are at least two orders f magnitude higher. Clearly, the data needs to be standardized before PCA can reveal any meaningful insights.
 
 <!-- Give your personal interpretations of the first two principal component dimensions based on the biplot drawn after PCA on the standardized human data. (0-2 points) -->
 
@@ -73,23 +69,24 @@ summary(tea_time)
 str(tea_time)
 ```
 
-Bar plots 
+From the output it is clear that all of the six variables are categorical. Let's draw bar plots to visualize the data.
 ```{r warning=FALSE}
 library(ggplot2)
 p <- gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free")
 p <- p + geom_bar()
 p + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 ```
+Variable `sugar` is quite even, but all other variables have distribution with one popular category.
 
-Produce the MCA model and print the summary
+Next, produce the MCA model (without a graph) and print the summary of the model
 ```{r}
 mca <- MCA(tea_time, graph = FALSE)
 summary(mca)
 ```
 
-visualize MCA
+The summary shows how musch of variance the different dimensions explain. Let's also visualize the MCA model.
 ```{r}
 plot(mca, invisible=c("ind"), habillage = "quali")
 ```
 
-
+Not really sure how to interpret this kind of plot.
