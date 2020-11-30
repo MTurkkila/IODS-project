@@ -54,6 +54,6 @@ glimpse(RATSL)
 # The long form data is practical if one want's to compare groups as that combines variable (Here week and Time) can be used  single variable in plots and analyses.
 
 # Save both data set
-write.csv(BPRSL, "data/BPRSL.csv")
-write.csv(RATSL, "data/RATSL.csv")
+write.csv(BPRSL, "data/BPRSL.csv", row.names = FALSE)
+write.csv(RATSL, "data/RATSL.csv",  row.names = FALSE)
 
