@@ -1,6 +1,46 @@
 # Analysis of longitudinal data
 
-```{r}
+<!-- Note that you must SWAP the data sets! :) It is NOT a simple copy & paste of my book! -->
 
+<!-- Implement the analyses of Chapter 8 of MABS using the RATS data. (0-7 points: 0-4 points for graphs or analysis results + 0-3 points for their interpretations) -->
+
+```{r}
+library(dplyr); library(ggplot2); library(tidyr)
+RATSL <- read.csv("data/RATSL.csv", )
+
+#refactor data
+RATSL$ID <- factor(RATSL$ID)
+RATSL$Group <- factor(RATSL$Group)
+
+glimpse(RATSL)
+```
+
+```{r}
+# Draw the plot
+ggplot(RATSL, aes(x = Time, y = Weight, group = ID, linetype =  Group)) +
+       geom_line() +
+       scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+       scale_y_continuous(name = "Weight (grams)") +
+       theme(legend.position = "top")
+
+```
+
+
+<!-- Implement the analyses of Chapter 9 of MABS using the BPRS data. (0-8 points: 0-4 points for graphs or analysis results + 0-4 points for their interpretations) -->
+```{r}
+BPRSL <- read.csv("data/BPRSL.csv")
+BPRSL$treatment <- factor(BPRSL$treatment)
+BPRSL$subject <- factor(BPRSL$subject)
+glimpse(BPRSL)
+```
+
+```{r}
+# Draw the plot
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
 ```
 

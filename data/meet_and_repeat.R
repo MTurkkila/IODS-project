@@ -9,12 +9,7 @@ library(tidyr)
 BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep  =" ", header = T)
 RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", header = TRUE, sep = '\t')
 
-# As before, write the wrangled data sets to files in your IODS-project data-folder.
-# Also, take a look at the data sets: check their variable names, view the data contents and structures,
-# and create some brief summaries of the variables,
-# so that you understand the point of the wide form data. (1 point)
-
-# Convert the categorical variables of both data sets to factors. (1 point)
+# Convert the categorical variables of both data sets to factors.
 BPRS$treatment <- factor(BPRS$treatment)
 BPRS$subject <- factor(BPRS$subject)
 
@@ -27,7 +22,7 @@ BPRSL <-  BPRS %>%
   mutate(week = as.integer(substr(weeks, 5, 5)))
 
 RATSL <- RATS %>%
-  gather(key = WD, value = TIME , -ID, -Group) %>%
+  gather(key = WD, value = Weight , -ID, -Group) %>%
   mutate(Time = as.integer(substr(WD, 3, 4))) 
 
 # Compare the wide and long form data sets
