@@ -1,19 +1,25 @@
 # Analysis of longitudinal data
 
 <!-- Note that you must SWAP the data sets! :) It is NOT a simple copy & paste of my book! -->
+```{r}
+library(dplyr); library(ggplot2); library(tidyr)
+```
+
+
+## Analysis of Longitudinal Data I: Graphical Displays and Summary Measure Approach
 
 <!-- Implement the analyses of Chapter 8 of MABS using the RATS data. (0-7 points: 0-4 points for graphs or analysis results + 0-3 points for their interpretations) -->
 
-```{r}
-library(dplyr); library(ggplot2); library(tidyr)
-RATSL <- read.csv("data/RATSL.csv", )
+The data used for this part is the long form `RATS` data set. The data set consists of longitudinal data of weight of the rats over nine week period. The rats were dived into three groups based on their diet.
 
-#refactor data
+Let's begin by reading in the data and re-factoring variables `ID` and `Group` and glimpse the data.
+```{r}
+RATSL <- read.csv("data/RATSL.csv", )
 RATSL$ID <- factor(RATSL$ID)
 RATSL$Group <- factor(RATSL$Group)
-
 glimpse(RATSL)
 ```
+<!-- Pitäiskö olla long formista tai datasta sanottuna jotain -->
 
 ```{r}
 # Draw the plot
@@ -24,7 +30,50 @@ ggplot(RATSL, aes(x = Time, y = Weight, group = ID, linetype =  Group)) +
        theme(legend.position = "top")
 
 ```
+Aiankin voisi keskiarvoistaa tuon plotin.
+Mitä kpl8 tehty: datan standardisointi, t-testi, boxplotit ja outlier, baseline, oisko tässä sitten weekday
+```{r}
+RATSL %>% group_by(Group, Time) %>% summarise(mean = mean(Weight)) %>% ungroup() %>% ggplot(aes(x = Time, y = mean, linetype = Group)) +
+  geom_line() +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weight (grams)") +
+  theme(legend.position = "top")
 
+```
+```{r}
+# Draw the plot
+ggplot(RATSL, aes(x = Group, y = Weight, fill = Group)) + geom_violin()
+```
+
+Boxplotit ryhmittäin ja yksilöittäin grouptauille painojen keskiarvoille. Ei mitenkään hyvä
+```{r}
+RATSL8S <- RATSL %>%
+  filter(Time > 1) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+# Glimpse the data
+glimpse(RATSL8S)
+
+
+ggplot(RATSL8S, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous()
+```
+```{r}
+# Fit the linear model with the mean as the response 
+fit <- lm(Weight ~ Time + Group, data = RATSL)
+# Compute the analysis of variance table for the fitted model with anova()
+anova(fit)
+```
+
+
+
+## Analysis of Longitudinal Data II: Linear Mixed Effects Models for Normal Response Variables
+
+Data for the second part comes from clinical trial in which brief psychiatric rating scale (BPRS) was measured over eighth weeks for two groups with different treatments. The data also includes baseline measurement as `week0` that was measured before any treatments.
 
 <!-- Implement the analyses of Chapter 9 of MABS using the BPRS data. (0-8 points: 0-4 points for graphs or analysis results + 0-4 points for their interpretations) -->
 ```{r}
