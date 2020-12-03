@@ -6,7 +6,7 @@ Before the analysis let's access the libraries.
 library(dplyr); library(ggplot2); library(tidyr)
 ```
 
-## Analysis of Longitudinal Data I: Graphical Displays and Summary Measures
+## Graphical Displays and Summary Measures
 
 <!-- Implement the analyses of Chapter 8 of MABS using the RATS data. (0-7 points: 0-4 points for graphs or analysis results + 0-3 points for their interpretations) -->
 
@@ -106,7 +106,7 @@ Now, it is clear that group two differs from groups one and three that are quite
 
 At this stage, it would be possible to the conduct ANOVA (t-test is inapplicable as there are three groups). However, I do not see what additional information it would provide that would be meaningful for comparing these groups.
 
-## Analysis of Longitudinal Data II: Linear Mixed Effects Models
+## Linear Mixed Effects Models
 Data for the second part comes from clinical trial in which brief psychiatric rating scale (BPRS) was measured over eighth weeks for two groups with different treatments.
 
 Read in the data and check structure and glimpse the data.
@@ -158,7 +158,7 @@ Fitted <- fitted(BPRSL_risim)
 BPRSL<- BPRSL %>% mutate(Fitted)
 ```
 
-```{r}
+```{r fig.width=10, fig.height=8}
 p1 <- ggplot(BPRSL, aes(x = week, y = bprs, colour = subject)) +
   geom_line(alpha = 0.5) +
   scale_linetype_manual(values = rep(1:10, times=4)) +
