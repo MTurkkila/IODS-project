@@ -1,11 +1,13 @@
 
 # About the project
+This page is the Course Diary for University of Helsinki course *Introduction to Open Data Science* (2020) for PhD students. The course introduces the use of R, RStudio, RMarkdown and GitHub and instructs how to apply them with simple statistical methods. This Course Diary includes all the relevant analysis exercises done during this course.
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
+The source files are in the GitHub repository: [https://github.com/MTurkkila/IODS-projectlink](https://github.com/MTurkkila/IODS-project) 
 
-The course seems to be set up nicely. At least much better than some online courses about statistics/programming. I hope I'll relearn to use R (briefly tried it about twelve years ago). RStudio seems convenient and I like the GitHub integration. Additionally, I hope to deepen my understanding of statistical methods.
+Here's my initial thoughts of the course I wrote at the beginning:
+*The course seems to be set up nicely. At least much better than some online courses about statistics/programming. I hope I'll relearn to use R (briefly tried it about twelve years ago). RStudio seems convenient and I like the GitHub integration. Additionally, I hope to deepen my understanding of statistical methods.*
 
-My GitHub repository: [https://github.com/MTurkkila/IODS-projectlink](https://github.com/MTurkkila/IODS-project) 
+
 
 
 
